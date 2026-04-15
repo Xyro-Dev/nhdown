@@ -124,7 +124,7 @@ async function bulkTranslateImages(urls, concurrency) {
 }
 
 /* ================= OUTPUT ================= */
-
+/*
 async function uploadToQuax(buffer) {
   const ext = (await fileType.fromBuffer(buffer))?.ext || 'pdf';
   const form = new FormData();
@@ -144,6 +144,37 @@ async function uploadToQuax(buffer) {
   }
 
   return { status: true, url: res.data.files[0].url };
+}
+*/
+
+async function uploadToQuax(buffer) {
+  try {
+    const ext = (await fileType.fromBuffer(buffer))?.ext || 'pdf'
+    const form = new FormData()
+
+    form.append('file', buffer, `${Date.now()}.${ext}`)
+
+    const res = await axios.post('https://cdn.crypty.workers.dev/', form, {
+      headers: {
+        ...form.getHeaders(),
+        'User-Agent': 'Mozilla/5.0'
+      }
+    })
+
+    const json = res.data
+
+    if (!json?.data?.id) {
+      return { status: false, msg: 'Upload gagal' }
+    }
+
+    return { json.data.id }
+
+  } catch (e) {
+    return {
+      status: false,
+      msg: e.message
+    }
+  }
 }
 
 function saveLocal(buffer, code) {
