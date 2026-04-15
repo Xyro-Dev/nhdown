@@ -164,16 +164,13 @@ async function uploadToQuax(buffer) {
     const json = res.data
 
     if (!json?.data?.id) {
-      return { status: false, msg: 'Upload gagal' }
+      return null
     }
 
-    return { json.data.id }
+    return json.data.id
 
   } catch (e) {
-    return {
-      status: false,
-      msg: e.message
-    }
+    return null
   }
 }
 
