@@ -163,11 +163,11 @@ async function uploadToQuax(buffer) {
 
     const json = res.data
 
-    if (!json?.data?.id) {
+    if (!json?.data?.url) {
       return null
     }
 
-    return json.data.id
+    return json.data.url
 
   } catch (e) {
     return null
