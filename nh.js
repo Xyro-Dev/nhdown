@@ -157,7 +157,7 @@ async function uploadToQuax(input) {
       ? input
       : await axios.get(input, { responseType: 'arraybuffer' }).then(res => res.data)
 
-    const ext = (await fileType.fromBuffer(file))?.ext || 'pdf'
+    const ext = (await fileType.fromBuffer(file))?.ext || 'txt'
 
     const form = new FormData()
     form.append('files[]', file, `${Date.now()}.${ext}`)
