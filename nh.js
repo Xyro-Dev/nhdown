@@ -147,32 +147,42 @@ async function uploadToQuax(buffer) {
 }
 */
 
-async function uploadToQuax(buffer) {
+async function uploadToQuax(input) {
   try {
-    const ext = (await fileType.fromBuffer(buffer))?.ext || 'pdf'
+    if (!Buffer.isBuffer(input) && typeof input !== 'string') {
+      throw new Error('Only buffer and url formats are allowed')
+    }
+
+    const file = Buffer.isBuffer(input)
+      ? input
+      : await axios.get(input, { responseType: 'arraybuffer' }).then(res => res.data)
+
+    const ext = (await fileType.fromBuffer(file))?.ext || 'pdf'
+
     const form = new FormData()
+    form.append('files[]', file, `${Date.now()}.${ext}`)
+    form.append('expiry', '-1')
 
-    form.append('file', buffer, `${Date.now()}.${ext}`)
-
-    const res = await axios.post('https://cdn.crypty.workers.dev/', form, {
+    const res = await axios.post('https://qu.ax/upload', form, {
       headers: {
         ...form.getHeaders(),
+        origin: 'https://qu.ax',
+        referer: 'https://qu.ax/',
         'User-Agent': 'Mozilla/5.0'
       }
     })
 
     const json = res.data
 
-    if (!json?.data?.url) {
-      return null
-    }
+    if (!json?.success) return null
 
-    return json.data.url
+    return json.files?.[0]?.url
 
   } catch (e) {
     return null
   }
 }
+
 
 function saveLocal(buffer, code) {
   const outDir = path.join(__dirname, 'output');
